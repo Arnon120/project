@@ -87,7 +87,7 @@ class OurFunctionF(Scene):
         self.wait(1)
         self.play(x_tracker.animate.set_value(1), runtime = 5, rate_func = linear)
         self.wait(1)
-        self.play(x_tracker.animate.set_value(2.8), runtime = 15, rate_func = linear) 
+        self.play(x_tracker.animate.set_value(2.71), runtime = 15, rate_func = linear) 
         self.wait(1)
 
 
@@ -195,12 +195,13 @@ class Similarity_to_log(Scene):
         graph_kwargs = {"color": BLUE}
         # SETUP FORMULA
         decimal = DecimalNumber(base_traker.get_value()).add_updater(lambda v: v.set_value(base_traker.get_value()))
-        formula = Tex("y = ", "log(x)/log(", ")")
+        formula = Tex("y = ", "log"," x")
         # ---- Arrange position of formula
         formula.next_to(ax, DOWN)
         formula.shift(UP)
-        formula[2].shift(RIGHT * 0.8)
-        decimal.next_to(formula[1],RIGHT*0.25)
+        decimal.scale(0.5)
+        decimal.next_to(formula[1],RIGHT)
+        decimal.shift(0.25*DOWN+LEFT*0.15)
         # SET UPDATERS
         def update_graph(mob):
             mob.become(
@@ -216,7 +217,11 @@ class Similarity_to_log(Scene):
         self.wait(1)
         self.play(Create(ax),Write(labels))
         self.wait(1)
-        self.play(Create(graph),Write(VGroup(formula[0],formula[1],decimal, formula[2])))
+        self.play(Create(graph),Write(VGroup(formula[0],formula[1],formula[2])))
+        self.wait(1)
+        self.play(Write(decimal),formula[2].animate.shift(RIGHT*0.45 + UP*0.05))
+        self.wait(1)
+
         self.play(
             base_traker.animate.set_value(9.9), runtime = 15, rate_functions = linear
         )
@@ -226,7 +231,7 @@ class Similarity_to_log(Scene):
         )
         self.wait(1)
         self.play(
-            base_traker.animate.set_value(2.8), runtime = 15, rate_functions = linear
+            base_traker.animate.set_value(2.71), runtime = 15, rate_functions = linear
         )
         self.wait()
 
