@@ -1,6 +1,7 @@
 #from typing_extensions import runtime
 
 import math
+from typing_extensions import runtime
 from PIL import UnidentifiedImageError
 from manim import *
 # How to compile Manim: CMD -> manim -pql scene.py OurFunctionF
@@ -180,51 +181,54 @@ class Similarity_to_log(Scene):
         equation_property.move_to(UP * 3 + RIGHT * 3)
         framebox = SurroundingRectangle(equation_property)
         framebox.set_color(WHITE)
-        base_traker = ValueTracker(2)
         ax = Axes(
-                x_range=[0, 10],
-                y_range=[0, 5],
-                x_axis_config={"numbers_to_include": [1,4,7]},
+                x_range=[0.5, 10],
+                y_range=[-2, 5],
+                x_axis_config={"numbers_to_include": []},
                 tips=False,
             )
         labels = ax.get_axis_labels()
-
-        curve = always_redraw(
-            ax.get_graph(
-                lambda x: (math.log(x) / math.log(base_traker.get_value())) , 
-                x_range=[0.8, 10], 
-                color=BLUE_C
+        
+        base_traker = ValueTracker(2)
+        func = lambda a: lambda x: (math.log(x)/math.log(a))
+        graph = VMobject()
+        graph_kwargs = {"color": BLUE}
+        # SETUP FORMULA
+        decimal = DecimalNumber(base_traker.get_value()).add_updater(lambda v: v.set_value(base_traker.get_value()))
+        formula = Tex("y = ", "log(x)/log(", ")")
+        # ---- Arrange position of formula
+        formula.next_to(ax, DOWN)
+        formula.shift(UP)
+        formula[2].shift(RIGHT * 0.8)
+        decimal.next_to(formula[1],RIGHT*0.25)
+        # SET UPDATERS
+        def update_graph(mob):
+            mob.become(
+                ax.get_graph(
+                    func(base_traker.get_value()),
+                    **graph_kwargs
                 )
             )
-        # x_AXIS = ax.get_graph(lambda x: 0, x_range=[0,10], color= WHITE)
-        curve_label = always_redraw(ax.get_graph_label(
-            curve, label= "\\log_{a}(x)", x_val=1.5, direction=UP * 5
-        ))
-        a_label = (
-            Tex("a = ")
-            .next_to(curve_label, RIGHT * 2 , buff= 0.1)
-            .set_color(YELLOW)
-            .add_background_rectangle()
+        # SET INITIAL STATE OF GRAPH
+        update_graph(graph)
+        graph.add_updater(update_graph)
+        self.add(equation,equation_property,framebox)
+        self.wait(1)
+        self.play(Create(ax),Write(labels))
+        self.wait(1)
+        self.play(Create(graph),Write(VGroup(formula[0],formula[1],decimal, formula[2])))
+        self.play(
+            base_traker.animate.set_value(9.9), runtime = 15, rate_functions = linear
         )
-        a_tex = always_redraw(
-            DecimalNumber(
-                base_traker.get_value())
-                .next_to(a_label,RIGHT,buff = 0.1)
-                .set_color(YELLOW)
-                .add_background_rectangle()
-            )
-        group_curve_label = VGroup(curve_label, a_label, a_tex)
-
-        self.add(equation, equation_property , framebox)
-        self.play(Create(ax), Create(labels))
-        self.wait(0.5)
-        #self.play(Create(curve))
-        self.play(Write(group_curve_label))
-        self.play(base_traker.animate.set_value(5), runtime = 15, rate_func = linear)
-        self.wait(0.5)
-        self.play(base_traker.animate.set_value(1.1), runtime = 15, rate_func = linear)
-        self.wait(0.5)
-        self.play(base_traker.animate.set_value(2.8), runtime = 15, rate_func = linear)
+        self.wait(1)
+        self.play(
+            base_traker.animate.set_value(1.7), runtime = 15, rate_functions = linear
+        )
+        self.wait(1)
+        self.play(
+            base_traker.animate.set_value(2.8), runtime = 15, rate_functions = linear
+        )
+        self.wait()
 
 
 
